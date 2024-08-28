@@ -13,23 +13,28 @@ import net.minestom.server.potion.PotionEffect;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public abstract class ACCheck {
     private final String name;
+    protected MangoAC.Config config;
 
     public ACCheck(String name) {
         this.name = name;
     }
 
-    public abstract void register(MangoAC.Config config);
+    public void enable(MangoAC.Config config) {
+        this.config = config;
+        register();
+    }
+
+    public abstract void register();
 
     public String name() {
         return name;
     }
 
     protected void debug(Player player, String message) {
-        if (!Objects.equals(name, "HitConsistency")) {
+        if (!config.debugChecks().contains(message)) {
             return;
         }
         player.sendMessage("[" + name() + "] " + message);

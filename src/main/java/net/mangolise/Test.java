@@ -27,13 +27,8 @@ public class Test {
         Instance instance = MinecraftServer.getInstanceManager().createInstanceContainer(chunkLoader);
         instance.enableAutoChunkLoad(true);
 
-        MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, e -> {
-            e.setSpawningInstance(instance);
-        });
-
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, e -> {
-            e.getPlayer().teleport(GameSdkUtils.getSpawnPosition(instance));
-        });
+        MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, e -> e.setSpawningInstance(instance));
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, e -> e.getPlayer().teleport(GameSdkUtils.getSpawnPosition(instance)));
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, e -> {
             if (e.getMessage().equals("t")) {
@@ -53,7 +48,7 @@ public class Test {
             target.damage(Damage.fromEntity(e.getEntity(), 0f));
         });
 
-        new MangoAC(new MangoAC.Config(false, List.of())).start();
+        new MangoAC(new MangoAC.Config(false, List.of(), List.of())).start();
 
         server.start("0.0.0.0", GameSdkUtils.getConfiguredPort());
     }

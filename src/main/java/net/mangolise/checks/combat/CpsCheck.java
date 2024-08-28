@@ -1,7 +1,6 @@
 package net.mangolise.checks.combat;
 
 import net.mangolise.ACCheck;
-import net.mangolise.MangoAC;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.EntityAttackEvent;
@@ -21,7 +20,7 @@ public class CpsCheck extends ACCheck {
     }
 
     @Override
-    public void register(MangoAC.Config config) {
+    public void register() {
         MinecraftServer.getGlobalEventHandler().addListener(EntityAttackEvent.class, e -> {
             if (!(e.getEntity() instanceof Player player)) {
                 return;

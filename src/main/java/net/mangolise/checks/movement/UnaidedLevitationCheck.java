@@ -1,7 +1,6 @@
 package net.mangolise.checks.movement;
 
 import net.mangolise.ACCheck;
-import net.mangolise.MangoAC;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -13,15 +12,13 @@ public class UnaidedLevitationCheck extends ACCheck {
     private final static int THRESHOLD = 3;
 
     private final HashMap<UUID, Double> blocksRaised = new HashMap<>();
-    private MangoAC.Config config;
 
     public UnaidedLevitationCheck() {
         super("UnaidedLevitation");
     }
 
     @Override
-    public void register(MangoAC.Config config) {
-        this.config = config;
+    public void register() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
     }
 

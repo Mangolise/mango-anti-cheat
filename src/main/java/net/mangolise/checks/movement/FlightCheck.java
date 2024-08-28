@@ -1,7 +1,6 @@
 package net.mangolise.checks.movement;
 
 import net.mangolise.ACCheck;
-import net.mangolise.MangoAC;
 import net.mangolise.Tuple;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -13,15 +12,13 @@ import java.util.*;
 
 public class FlightCheck extends ACCheck {
     private final HashMap<UUID, List<Tuple<Long, Pos>>> playerDetails = new HashMap<>();
-    private MangoAC.Config config;
 
     public FlightCheck() {
         super("Flight");
     }
 
     @Override
-    public void register(MangoAC.Config config) {
-        this.config = config;
+    public void register() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
         MinecraftServer.getGlobalEventHandler().addListener(AddEntityToInstanceEvent.class, e -> {
             if (e.getEntity() instanceof Player p) {

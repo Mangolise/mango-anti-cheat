@@ -1,7 +1,6 @@
 package net.mangolise.checks.movement;
 
 import net.mangolise.ACCheck;
-import net.mangolise.MangoAC;
 import net.mangolise.Tuple;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -23,15 +22,13 @@ public class BasicSpeedCheck extends ACCheck {
     private final static int AVERAGE_TIME_PERIOD_MS = 1000;
 
     private final HashMap<UUID, List<Tuple<Long, Pos>>> playerDetails = new HashMap<>();
-    private MangoAC.Config config;
 
     public BasicSpeedCheck() {
         super("BasicSpeed");
     }
 
     @Override
-    public void register(MangoAC.Config config) {
-        this.config = config;
+    public void register() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
     }
 

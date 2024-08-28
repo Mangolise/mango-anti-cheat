@@ -31,12 +31,12 @@ public class MangoAC {
     public void start() {
         checks.forEach(acCheck -> {
             if (config.disabledChecks.contains(acCheck.getClass())) return;
-            acCheck.register(config);
+            acCheck.enable(config);
         });
     }
 
     /**
      * @param passive Whether the AC should disable lag backs and just observe players.
      */
-    public record Config(boolean passive, List<Class<? extends ACCheck>> disabledChecks) { }
+    public record Config(boolean passive, List<Class<? extends ACCheck>> disabledChecks, List<String> debugChecks) { }
 }

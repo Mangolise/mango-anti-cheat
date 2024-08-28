@@ -1,7 +1,6 @@
 package net.mangolise.checks.movement;
 
 import net.mangolise.ACCheck;
-import net.mangolise.MangoAC;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerMoveEvent;
@@ -9,15 +8,12 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 public class VClipCheck extends ACCheck {
     private final static int THRESHOLD = 3;
 
-    private MangoAC.Config config;
-
     public VClipCheck() {
         super("VClip");
     }
 
     @Override
-    public void register(MangoAC.Config config) {
-        this.config = config;
+    public void register() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
     }
 
