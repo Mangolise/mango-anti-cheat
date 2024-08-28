@@ -28,7 +28,7 @@ publishing {
     repositories {
         maven {
             name = "serbleMaven"
-            url = uri("https://maven.serble.net/private/")
+            url = uri("https://maven.serble.net/snapshots/")
             credentials {
                 username = System.getenv("SERBLE_REPO_USERNAME") ?: ""
                 password = System.getenv("SERBLE_REPO_PASSWORD") ?: ""
@@ -43,14 +43,14 @@ publishing {
         publications {
             create<MavenPublication>("mavenGitCommit") {
                 groupId = "net.mangolise"
-                artifactId = project.name
+                artifactId = "mango-anti-cheat"
                 version = versionStr
                 from(components["java"])
             }
 
             create<MavenPublication>("mavenLatest") {
                 groupId = "net.mangolise"
-                artifactId = project.name
+                artifactId = "mango-anti-cheat"
                 version = "latest"
                 from(components["java"])
             }
