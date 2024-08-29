@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerMoveEvent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -43,7 +44,7 @@ public class BasicSpeedCheck extends ACCheck {
 
         List<Tuple<Long, Pos>> details = playerDetails.get(p.getUuid());
         if (details == null) {
-            details = new java.util.ArrayList<>();
+            details = new ArrayList<>();
             playerDetails.put(p.getUuid(), details);
             debug(p, "created new details");
             return;
@@ -61,7 +62,7 @@ public class BasicSpeedCheck extends ACCheck {
 
         if (playerDetails.get(p.getUuid()).stream().anyMatch(tuple -> Math.abs(tuple.getSecond().x() - mean) > standardDeviation * 2)) {
             debug(p, "outlier detected in speed, IGNORING ALL DATA");
-            playerDetails.put(p.getUuid(), new java.util.ArrayList<>());
+            playerDetails.put(p.getUuid(), new ArrayList<>());
             return;
         }
 

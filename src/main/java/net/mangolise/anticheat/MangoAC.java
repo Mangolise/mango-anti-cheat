@@ -72,6 +72,12 @@ public class MangoAC {
         });
     }
 
+    public void tempDisableCheck(Player player, Class<? extends ACCheck> check, long time) {
+        checks.stream().filter(acCheck -> acCheck.getClass().equals(check)).findFirst().ifPresent(acCheck -> {
+            acCheck.disableFor(player, time);
+        });
+    }
+
     /**
      * @param passive Whether the AC should disable lag backs and just observe players.
      */
