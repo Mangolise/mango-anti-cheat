@@ -1,7 +1,7 @@
-package net.mangolise.checks.movement;
+package net.mangolise.anticheat.checks.movement;
 
-import net.mangolise.ACCheck;
-import net.mangolise.Tuple;
+import net.mangolise.anticheat.ACCheck;
+import net.mangolise.anticheat.Tuple;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -11,6 +11,7 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 import java.util.*;
 
 public class FlightCheck extends ACCheck {
+    private static final long MIN_SAMPLE_TIME = 500;
     private final HashMap<UUID, List<Tuple<Long, Pos>>> playerDetails = new HashMap<>();
 
     public FlightCheck() {
@@ -74,12 +75,13 @@ public class FlightCheck extends ACCheck {
         }
 
         // Return if the oldest location is newer than half a second
-        if (fromTime > System.currentTimeMillis() - 500) {
+        if (fromTime > System.currentTimeMillis() - MIN_SAMPLE_TIME) {
             debug(p, "sample time not met");
             return;
         }
 
-        flag(p, 0.7f);  // They have moved without going up or down, and they are not on the ground.
+        float certainty = 0.7f;  // We are cancelling so it's binary, we can't have varying certainty.
+        flag(p, certainty);  // They have moved without going up or down, and they are not on the ground.
         if (!config.passive()) {
             e.setCancelled(true);
         }

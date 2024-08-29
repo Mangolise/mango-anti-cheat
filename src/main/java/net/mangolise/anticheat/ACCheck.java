@@ -1,8 +1,6 @@
-package net.mangolise;
+package net.mangolise.anticheat;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.mangolise.events.PlayerFlagEvent;
+import net.mangolise.anticheat.events.PlayerFlagEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
@@ -17,13 +15,15 @@ import java.util.List;
 public abstract class ACCheck {
     private final String name;
     protected MangoAC.Config config;
+    protected MangoAC ac;
 
     public ACCheck(String name) {
         this.name = name;
     }
 
-    public void enable(MangoAC.Config config) {
+    public void enable(MangoAC ac, MangoAC.Config config) {
         this.config = config;
+        this.ac = ac;
         register();
     }
 
@@ -47,8 +47,6 @@ public abstract class ACCheck {
     public void flag(Player player, float certainty) {
         PlayerFlagEvent event = new PlayerFlagEvent(name(), player, certainty);
         MinecraftServer.getGlobalEventHandler().call(event);
-        player.sendMessage(Component.text("You have been flagged for " + name() + " with a certainty of " + certainty)
-                .color(NamedTextColor.RED));
     }
 
     public List<Block> getBlocksPlayerIsStandingOn(Player p, int yOffset) {
@@ -64,10 +62,10 @@ public abstract class ACCheck {
         Pos corner3 = new Pos(x + 0.3, y-1, z - 0.3);
         Pos corner4 = new Pos(x - 0.3, y-1, z - 0.3);
 
-        Block block1 = p.getInstance().getBlock(corner1);
-        Block block2 = p.getInstance().getBlock(corner2);
-        Block block3 = p.getInstance().getBlock(corner3);
-        Block block4 = p.getInstance().getBlock(corner4);
+        Block block1 = ac.getBlockAt(p, corner1);
+        Block block2 = ac.getBlockAt(p, corner2);
+        Block block3 = ac.getBlockAt(p, corner3);
+        Block block4 = ac.getBlockAt(p, corner4);
 
         // add the blocks to the list
         materialList.add(block1);

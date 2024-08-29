@@ -1,4 +1,4 @@
-package net.mangolise.events;
+package net.mangolise.anticheat.events;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;

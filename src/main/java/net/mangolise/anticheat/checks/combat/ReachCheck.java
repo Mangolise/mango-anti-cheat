@@ -1,6 +1,6 @@
-package net.mangolise.checks.combat;
+package net.mangolise.anticheat.checks.combat;
 
-import net.mangolise.ACCheck;
+import net.mangolise.anticheat.ACCheck;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.EntityAttackEvent;
@@ -23,7 +23,8 @@ public class ReachCheck extends ACCheck {
             debug(player, "Distance: " + distance);
 
             if (distance > THRESHOLD) {
-                flag(player, 0.7f);
+                float certainty = Math.min(1f, ((float) distance / 10f) + 0.7f);
+                flag(player, certainty);
             }
         });
     }

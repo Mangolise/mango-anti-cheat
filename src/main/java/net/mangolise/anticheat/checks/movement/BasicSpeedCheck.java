@@ -1,7 +1,7 @@
-package net.mangolise.checks.movement;
+package net.mangolise.anticheat.checks.movement;
 
-import net.mangolise.ACCheck;
-import net.mangolise.Tuple;
+import net.mangolise.anticheat.ACCheck;
+import net.mangolise.anticheat.Tuple;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -88,7 +88,8 @@ public class BasicSpeedCheck extends ACCheck {
         //p.sendActionBar(Component.text("Speed: " + String.format("%.2f", speed) + " Expected: " + String.format("%.2f", expectedMaxWalkSpeed)));
 
         if (speed > expectedMaxWalkSpeed + THRESHOLD) {
-            flag(p, 0.5f);
+            float certainty = (float) Math.min(1f, (speed - expectedMaxWalkSpeed) / 2f);
+            flag(p, certainty);
             debug(p, "Lowest valid threshold: " + (speed - expectedMaxWalkSpeed));
             if (!config.passive()) {
                 e.setCancelled(true);

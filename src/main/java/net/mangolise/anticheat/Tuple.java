@@ -1,4 +1,4 @@
-package net.mangolise;
+package net.mangolise.anticheat;
 
 public class Tuple<T1, T2> {
     private final T1 first;

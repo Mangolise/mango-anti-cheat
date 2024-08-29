@@ -1,6 +1,6 @@
-package net.mangolise.checks.movement;
+package net.mangolise.anticheat.checks.movement;
 
-import net.mangolise.ACCheck;
+import net.mangolise.anticheat.ACCheck;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -47,7 +47,8 @@ public class UnaidedLevitationCheck extends ACCheck {
 
         // check if the player has gone up more than 3 blocks without going down then fail
         if (blocksRaised.get(playerId) > THRESHOLD) {
-            flag(p, 0.9f);
+            float certainty = Math.min(1f, (float) ((blocksRaised.get(playerId) - THRESHOLD) / 10d) + 0.5f);
+            flag(p, certainty);
             if (!config.passive()) {
                 e.setCancelled(true);
             }

@@ -1,4 +1,4 @@
-package net.mangolise;
+package net.mangolise.anticheat;
 
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;

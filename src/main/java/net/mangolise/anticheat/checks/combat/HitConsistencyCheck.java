@@ -1,7 +1,7 @@
-package net.mangolise.checks.combat;
+package net.mangolise.anticheat.checks.combat;
 
-import net.mangolise.ACCheck;
-import net.mangolise.Tuple;
+import net.mangolise.anticheat.ACCheck;
+import net.mangolise.anticheat.Tuple;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.EntityAttackEvent;
@@ -53,7 +53,8 @@ public class HitConsistencyCheck extends ACCheck {
             debug(player, "SDSD: " + stdStd);
 
             if (stdStd <= THRESHOLD) {
-                flag(player, 0.6f);
+                float certainty = Math.max(0.1f, 1f - (float) (stdStd / THRESHOLD));
+                flag(player, certainty);
             }
         });
     }

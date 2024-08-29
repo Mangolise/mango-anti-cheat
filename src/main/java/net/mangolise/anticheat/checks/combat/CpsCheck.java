@@ -1,6 +1,6 @@
-package net.mangolise.checks.combat;
+package net.mangolise.anticheat.checks.combat;
 
-import net.mangolise.ACCheck;
+import net.mangolise.anticheat.ACCheck;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.EntityAttackEvent;
@@ -37,7 +37,8 @@ public class CpsCheck extends ACCheck {
             debug(player, "CPS: " + cps + " (SD: " + standardDeviation(hits.get(player.getUuid())) + ")");
 
             if (cps >= THRESHOLD) {
-                flag(player, 0.8f);
+                float certainty = Math.min(1f, ((float) (cps - THRESHOLD) / 10f) + 0.7f);
+                flag(player, certainty);
             }
         });
     }
