@@ -30,7 +30,7 @@ public class FlightCheck extends ACCheck {
 
     private void onMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
-        if (!canCheck(p)) return;
+        if (isBypassing(p)) return;
 
         if (isBypassFly(p)) {
             debug(p, "bypassed");

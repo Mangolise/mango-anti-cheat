@@ -26,6 +26,10 @@ public class CpsCheck extends ACCheck {
                 return;
             }
 
+            if (isBypassing(player)) {
+                return;
+            }
+
             if (!hits.containsKey(player.getUuid())) {
                 hits.put(player.getUuid(), new java.util.ArrayList<>());
             }

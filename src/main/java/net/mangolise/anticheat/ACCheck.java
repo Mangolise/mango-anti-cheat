@@ -40,8 +40,11 @@ public abstract class ACCheck {
         player.sendMessage("[" + name() + "] " + message);
     }
 
-    protected boolean canCheck(Player player) {
-        return true;
+    protected boolean isBypassing(Player player) {
+        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
+            return true;
+        }
+        return false;
     }
 
     public void flag(Player player, float certainty) {

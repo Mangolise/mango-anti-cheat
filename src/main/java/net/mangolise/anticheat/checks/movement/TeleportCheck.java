@@ -21,7 +21,7 @@ public class TeleportCheck extends ACCheck {
 
     private void onMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
-        if (!canCheck(p)) return;
+        if (isBypassing(p)) return;
 
         double yDiff = e.getNewPosition().y() - e.getPlayer().getPosition().y();
         checkAxis(e, p, yDiff, DOWN_THRESHOLD, UP_THRESHOLD);

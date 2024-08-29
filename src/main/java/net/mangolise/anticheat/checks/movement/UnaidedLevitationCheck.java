@@ -24,7 +24,7 @@ public class UnaidedLevitationCheck extends ACCheck {
 
     private void onMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
-        if (!canCheck(p)) return;
+        if (isBypassing(p)) return;
         UUID playerId = p.getUuid();
 
         if (isBypassFly(p)) {

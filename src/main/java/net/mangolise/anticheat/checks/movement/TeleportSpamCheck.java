@@ -21,6 +21,8 @@ public class TeleportSpamCheck extends ACCheck {
     @Override
     public void register() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, e -> {
+            if (isBypassing(e.getPlayer())) return;
+
             Pos pos1 = e.getPlayer().getPosition().withY(0);
             Pos pos2 = e.getNewPosition().withY(0);
 

@@ -19,6 +19,8 @@ public class ReachCheck extends ACCheck {
                 return;
             }
 
+            if (isBypassing(player)) return;
+
             double distance = player.getPosition().distance(e.getTarget().getPosition());
             debug(player, "Distance: " + distance);
 

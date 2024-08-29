@@ -34,7 +34,7 @@ public class BasicSpeedCheck extends ACCheck {
 
     private void onMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
-        if (!canCheck(p)) return;
+        if (isBypassing(p)) return;
 
         if (isBypassSpeed(p)) {
             debug(p, "bypassed");
