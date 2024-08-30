@@ -48,7 +48,7 @@ public class Test {
             }
 
             if (e.getMessage().equals("dislev")) {
-                ac.tempDisableCheck(e.getPlayer(), UnaidedLevitationCheck.class, 5000);
+                ac.tempDisableCheck(e.getPlayer(), UnaidedLevitationCheck.class, 100);
             }
         });
 

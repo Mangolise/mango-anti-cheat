@@ -72,7 +72,7 @@ public class MangoAC {
         });
     }
 
-    public void tempDisableCheck(Player player, Class<? extends ACCheck> check, long time) {
+    public void tempDisableCheck(Player player, Class<? extends ACCheck> check, int time) {
         checks.stream().filter(acCheck -> acCheck.getClass().equals(check)).findFirst().ifPresent(acCheck -> {
             acCheck.disableFor(player, time);
         });

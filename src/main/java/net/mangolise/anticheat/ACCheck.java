@@ -36,10 +36,10 @@ public abstract class ACCheck {
         return name;
     }
 
-    public void disableFor(Player player, long time) {
+    public void disableFor(Player player, int time) {
         disabledPlayers.add(player.getUuid());
         MinecraftServer.getSchedulerManager().buildTask(() ->
-                disabledPlayers.remove(player.getUuid())).delay(TaskSchedule.millis(time)).schedule();
+                disabledPlayers.remove(player.getUuid())).delay(TaskSchedule.tick(time)).schedule();
     }
 
     protected void debug(Player player, String message) {
