@@ -50,13 +50,9 @@ public abstract class ACCheck {
     }
 
     protected boolean isBypassing(Player player) {
-        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
-            return true;
-        }
-        if (disabledPlayers.contains(player.getUuid())) {
-            return true;
-        }
-        return false;
+        return player.getGameMode() == GameMode.CREATIVE ||
+                player.getGameMode() == GameMode.SPECTATOR ||
+                disabledPlayers.contains(player.getUuid());
     }
 
     public void flag(Player player, float certainty) {
