@@ -8,14 +8,17 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.potion.PotionEffect;
+import net.minestom.server.timer.TaskSchedule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public abstract class ACCheck {
     private final String name;
     protected MangoAC.Config config;
     protected MangoAC ac;
+    protected final List<UUID> disabledPlayers = new ArrayList<>();
 
     public ACCheck(String name) {
         this.name = name;
@@ -33,6 +36,12 @@ public abstract class ACCheck {
         return name;
     }
 
+    public void disableFor(Player player, int time) {
+        disabledPlayers.add(player.getUuid());
+        MinecraftServer.getSchedulerManager().buildTask(() ->
+                disabledPlayers.remove(player.getUuid())).delay(TaskSchedule.tick(time)).schedule();
+    }
+
     protected void debug(Player player, String message) {
         if (!config.debugChecks().contains(message)) {
             return;
@@ -41,10 +50,9 @@ public abstract class ACCheck {
     }
 
     protected boolean isBypassing(Player player) {
-        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
-            return true;
-        }
-        return false;
+        return player.getGameMode() == GameMode.CREATIVE ||
+                player.getGameMode() == GameMode.SPECTATOR ||
+                disabledPlayers.contains(player.getUuid());
     }
 
     public void flag(Player player, float certainty) {

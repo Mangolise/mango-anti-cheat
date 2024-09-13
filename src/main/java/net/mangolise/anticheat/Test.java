@@ -2,6 +2,7 @@ package net.mangolise.anticheat;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.mangolise.anticheat.checks.movement.UnaidedLevitationCheck;
 import net.mangolise.anticheat.events.PlayerFlagEvent;
 import net.mangolise.gamesdk.util.GameSdkUtils;
 import net.minestom.server.MinecraftServer;
@@ -35,6 +36,8 @@ public class Test {
         MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, e -> e.setSpawningInstance(instance));
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, e -> e.getPlayer().teleport(GameSdkUtils.getSpawnPosition(instance)));
 
+        MangoAC ac = new MangoAC(new MangoAC.Config(false, List.of(), DEBUG_CHECKS));
+
         MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, e -> {
             if (e.getMessage().equals("t")) {
                 e.getPlayer().teleport(e.getPlayer().getPosition().add(10, 10, 0));
@@ -42,6 +45,10 @@ public class Test {
 
             if (e.getMessage().equals("ping")) {
                 e.getPlayer().sendMessage("Latency: " + e.getPlayer().getLatency());
+            }
+
+            if (e.getMessage().equals("dislev")) {
+                ac.tempDisableCheck(e.getPlayer(), UnaidedLevitationCheck.class, 100);
             }
         });
 
@@ -58,7 +65,7 @@ public class Test {
                     .text("You have been flagged for " + e.checkName() + " with a certainty of " + e.certainty())
                     .color(NamedTextColor.RED)));
 
-        new MangoAC(new MangoAC.Config(false, List.of(), DEBUG_CHECKS)).start();
+        ac.start();
 
         server.start("0.0.0.0", GameSdkUtils.getConfiguredPort());
     }

@@ -33,6 +33,14 @@ public class BasicSpeedCheck extends ACCheck {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
     }
 
+    @Override
+    public void disableFor(Player player, int time) {
+        super.disableFor(player, time);
+
+        // reset details if the check is disabled
+        playerDetails.put(player.getUuid(), new ArrayList<>());
+    }
+
     private void onMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
         if (isBypassing(p)) return;

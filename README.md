@@ -64,7 +64,6 @@ package net.mangolise.anticheat;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.mangolise.anticheat.events.PlayerFlagEvent;
-import net.mangolise.gamesdk.util.GameSdkUtils;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.Instance;
@@ -97,7 +96,7 @@ public class Test {
         MangoAC ac = new MangoAC(config);
         ac.start();  // Start the anti cheat
 
-        server.start("0.0.0.0", GameSdkUtils.getConfiguredPort());
+        server.start("0.0.0.0", 25565);
     }
 }
 ```
