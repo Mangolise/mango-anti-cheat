@@ -68,7 +68,7 @@ public class BasicSpeedCheck extends ACCheck {
         final double mean = sum / details.size();
         final double standardDeviation = Math.sqrt((sumOfSquares - (Math.pow(sum, 2) / details.size())) / details.size());
 
-        if (playerDetails.get(p.getUuid()).stream().anyMatch(tuple -> Math.abs(tuple.getSecond().x() - mean) > standardDeviation * 2)) {
+        if (details.stream().anyMatch(tuple -> Math.abs(tuple.getSecond().x() - mean) > standardDeviation * 2)) {
             debug(p, "outlier detected in speed, IGNORING ALL DATA");
             playerDetails.put(p.getUuid(), new ArrayList<>());
             return;

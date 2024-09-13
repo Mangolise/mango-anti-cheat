@@ -5,10 +5,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.EntityAttackEvent;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class CpsCheck extends ACCheck {
     private static final double THRESHOLD = 20;
@@ -30,11 +27,12 @@ public class CpsCheck extends ACCheck {
                 return;
             }
 
-            hits.computeIfAbsent(player.getUuid(), uuid -> new java.util.ArrayList<>()).add(System.currentTimeMillis());
-            hits.get(player.getUuid()).removeIf(time -> time < System.currentTimeMillis() - SAMPLE_TIME);
+            List<Long> pHits = hits.computeIfAbsent(player.getUuid(), uuid -> new ArrayList<>());
+            pHits.add(System.currentTimeMillis());
+            pHits.removeIf(time -> time < System.currentTimeMillis() - SAMPLE_TIME);
 
-            int cps = hits.get(player.getUuid()).size();
-            debug(player, "CPS: " + cps + " (SD: " + standardDeviation(hits.get(player.getUuid())) + ")");
+            int cps = pHits.size();
+            debug(player, "CPS: " + cps + " (SD: " + standardDeviation(pHits) + ")");
 
             if (cps >= THRESHOLD) {
                 float certainty = Math.min(1f, ((float) (cps - THRESHOLD) / 10f) + 0.7f);

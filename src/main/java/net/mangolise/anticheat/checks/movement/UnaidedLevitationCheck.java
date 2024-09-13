@@ -43,11 +43,12 @@ public class UnaidedLevitationCheck extends ACCheck {
         }
 
         // add the distance between the two y values to the hashmap
-        blocksRaised.put(playerId, blocksRaised.getOrDefault(playerId, 0.0) + (to.y() - from.y()));
+        double newRaised = blocksRaised.getOrDefault(playerId, 0.0) + (to.y() - from.y());
+        blocksRaised.put(playerId, newRaised);
 
         // check if the player has gone up more than 3 blocks without going down then fail
-        if (blocksRaised.get(playerId) > THRESHOLD) {
-            float certainty = Math.min(1f, (float) ((blocksRaised.get(playerId) - THRESHOLD) / 10d) + 0.5f);
+        if (newRaised > THRESHOLD) {
+            float certainty = Math.min(1f, (float) ((newRaised - THRESHOLD) / 10d) + 0.5f);
             flag(p, certainty);
             if (!config.passive()) {
                 e.setCancelled(true);

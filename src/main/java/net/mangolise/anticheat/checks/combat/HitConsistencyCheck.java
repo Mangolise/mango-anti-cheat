@@ -27,20 +27,22 @@ public class HitConsistencyCheck extends ACCheck {
 
             if (isBypassing(player)) return;
 
-            hits.computeIfAbsent(player.getUuid(), f -> new ArrayList<>()).add(System.currentTimeMillis());
-            hits.get(player.getUuid()).removeIf(time -> time < System.currentTimeMillis() - SAMPLE_TIME);
+            List<Long> pHits = hits.computeIfAbsent(player.getUuid(), f -> new ArrayList<>());
+            pHits.add(System.currentTimeMillis());
+            pHits.removeIf(time -> time < System.currentTimeMillis() - SAMPLE_TIME);
 
-            double std = standardDeviationLong(hits.get(player.getUuid()));
+            double std = standardDeviationLong(pHits);
 
-            hitStds.computeIfAbsent(player.getUuid(), f -> new ArrayList<>()).add(new Tuple<>(System.currentTimeMillis(), std));
-            hitStds.get(player.getUuid()).removeIf(val -> val.getFirst() < System.currentTimeMillis() - SAMPLE_TIME);
+            List<Tuple<Long, Double>> pHitStds = hitStds.computeIfAbsent(player.getUuid(), f -> new ArrayList<>());
+            pHitStds.add(new Tuple<>(System.currentTimeMillis(), std));
+            pHitStds.removeIf(val -> val.getFirst() < System.currentTimeMillis() - SAMPLE_TIME);
 
-            if (hitStds.get(player.getUuid()).size() < 5) {
+            if (pHitStds.size() < 5) {
                 debug(player, "No hit stds");
                 return;
             }
 
-            double stdStd = standardDeviationDouble(hitStds.get(player.getUuid()).stream().map(Tuple::getSecond).toList());
+            double stdStd = standardDeviationDouble(pHitStds.stream().map(Tuple::getSecond).toList());
             debug(player, "SDSD: " + stdStd);
 
             if (stdStd <= THRESHOLD) {
