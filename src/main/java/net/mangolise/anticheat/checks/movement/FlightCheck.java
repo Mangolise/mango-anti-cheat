@@ -40,7 +40,7 @@ public class FlightCheck extends ACCheck {
         Pos from = e.getPlayer().getPosition();
         Long fromTime = System.currentTimeMillis();
         Pos to = e.getNewPosition();
-        if (playerDetails.containsKey(p.getUuid())) {
+        if (playerDetails.containsKey(p.getUuid())) {  // Only bother removing stuff if there is stuff to remove
             playerDetails.get(p.getUuid()).removeIf(tuple -> tuple.getFirst() < System.currentTimeMillis() - 1000);
             playerDetails.get(p.getUuid()).add(new Tuple<>(System.currentTimeMillis(), to));
 
@@ -51,7 +51,7 @@ public class FlightCheck extends ACCheck {
             from = playerDetails.get(p.getUuid()).getFirst().getSecond();
             fromTime = playerDetails.get(p.getUuid()).getFirst().getFirst();
         } else {
-            List<Tuple<Long, Pos>> details = new java.util.ArrayList<>();
+            List<Tuple<Long, Pos>> details = new ArrayList<>();
             details.add(new Tuple<>(System.currentTimeMillis(), to));
             playerDetails.put(p.getUuid(), details);
         }

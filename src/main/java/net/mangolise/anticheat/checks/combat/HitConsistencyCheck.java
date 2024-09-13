@@ -6,10 +6,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.EntityAttackEvent;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class HitConsistencyCheck extends ACCheck {
     private static final double THRESHOLD = 1;
@@ -30,20 +27,12 @@ public class HitConsistencyCheck extends ACCheck {
 
             if (isBypassing(player)) return;
 
-            if (!hits.containsKey(player.getUuid())) {
-                hits.put(player.getUuid(), new java.util.ArrayList<>());
-            }
-
-            if (!hitStds.containsKey(player.getUuid())) {
-                hitStds.put(player.getUuid(), new java.util.ArrayList<>());
-            }
-
-            hits.get(player.getUuid()).add(System.currentTimeMillis());
+            hits.computeIfAbsent(player.getUuid(), f -> new ArrayList<>()).add(System.currentTimeMillis());
             hits.get(player.getUuid()).removeIf(time -> time < System.currentTimeMillis() - SAMPLE_TIME);
 
             double std = standardDeviationLong(hits.get(player.getUuid()));
 
-            hitStds.get(player.getUuid()).add(new Tuple<>(System.currentTimeMillis(), std));
+            hitStds.computeIfAbsent(player.getUuid(), f -> new ArrayList<>()).add(new Tuple<>(System.currentTimeMillis(), std));
             hitStds.get(player.getUuid()).removeIf(val -> val.getFirst() < System.currentTimeMillis() - SAMPLE_TIME);
 
             if (hitStds.get(player.getUuid()).size() < 5) {

@@ -31,11 +31,8 @@ public class TeleportSpamCheck extends ACCheck {
             }
 
             UUID uuid = e.getPlayer().getUuid();
-            if (!teleportTimes.containsKey(uuid)) {
-                teleportTimes.put(uuid, new ArrayList<>());
-            }
 
-            List<Long> times = teleportTimes.get(uuid);
+            List<Long> times = teleportTimes.computeIfAbsent(uuid, f -> new ArrayList<>());
             long currentTime = System.currentTimeMillis();
             times.add(currentTime);
 

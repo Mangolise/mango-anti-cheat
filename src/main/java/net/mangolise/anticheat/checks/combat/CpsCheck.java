@@ -30,11 +30,7 @@ public class CpsCheck extends ACCheck {
                 return;
             }
 
-            if (!hits.containsKey(player.getUuid())) {
-                hits.put(player.getUuid(), new java.util.ArrayList<>());
-            }
-
-            hits.get(player.getUuid()).add(System.currentTimeMillis());
+            hits.computeIfAbsent(player.getUuid(), uuid -> new java.util.ArrayList<>()).add(System.currentTimeMillis());
             hits.get(player.getUuid()).removeIf(time -> time < System.currentTimeMillis() - SAMPLE_TIME);
 
             int cps = hits.get(player.getUuid()).size();
