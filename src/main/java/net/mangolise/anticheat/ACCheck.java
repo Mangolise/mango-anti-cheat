@@ -2,6 +2,9 @@ package net.mangolise.anticheat;
 
 import net.mangolise.anticheat.events.PlayerFlagEvent;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -10,15 +13,35 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.timer.TaskSchedule;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class ACCheck {
     private final String name;
     protected MangoAC.Config config;
     protected MangoAC ac;
     protected final List<UUID> disabledPlayers = new ArrayList<>();
+
+    private static final Set<Integer> NO_FALL_DAMAGE_BLOCKS = Set.of(
+            Block.WATER.id(),
+            Block.LAVA.id(),
+            Block.SLIME_BLOCK.id(),
+            Block.HONEY_BLOCK.id(),
+            Block.COBWEB.id(),
+            Block.VINE.id(),
+            Block.LADDER.id(),
+            Block.WEEPING_VINES.id(),
+            Block.TWISTING_VINES.id(),
+            Block.WEEPING_VINES_PLANT.id(),
+            Block.TWISTING_VINES_PLANT.id()
+    );
+
+    private static final Set<Integer> BUBBLE_COLUMN_BLOCKS = Set.of(
+            Block.BUBBLE_COLUMN.id(),
+            Block.BUBBLE_CORAL_BLOCK.id(),
+            Block.BUBBLE_CORAL_FAN.id(),
+            Block.BUBBLE_CORAL_WALL_FAN.id(),
+            Block.BUBBLE_CORAL.id()
+    );
 
     public ACCheck(String name) {
         this.name = name;
@@ -60,70 +83,46 @@ public abstract class ACCheck {
         MinecraftServer.getGlobalEventHandler().call(event);
     }
 
-    public List<Block> getBlocksPlayerIsStandingOn(Player p, int yOffset) {
-        List<Block> materialList = new ArrayList<>();
-        Pos playerLocation = p.getPosition();
-        double x = playerLocation.x();
-        double y = playerLocation.y() + yOffset;
-        double z = playerLocation.z();
+    public Set<Integer> getBlockIdsAtPlayerFeet(Player p, double yOffset) {
+        Pos playerLocation = p.getPosition().add(0, yOffset, 0);
+        Set<BlockVec> points = new HashSet<>();
+        BoundingBox box = p.getBoundingBox();
 
-        // get 4 corners of the player hitbox
-        Pos corner1 = new Pos(x + 0.3, y-1, z + 0.3);
-        Pos corner2 = new Pos(x - 0.3, y-1, z + 0.3);
-        Pos corner3 = new Pos(x + 0.3, y-1, z - 0.3);
-        Pos corner4 = new Pos(x - 0.3, y-1, z - 0.3);
+        // get the rounded points for all four corners and add them to a set to remove duplicates
+        // center isn't needed because the player is less a block wide
+        points.add(new BlockVec(playerLocation.add(box.minX(), box.minY(), box.minZ())));
+        points.add(new BlockVec(playerLocation.add(box.minX(), box.minY(), box.maxZ())));
+        points.add(new BlockVec(playerLocation.add(box.maxX(), box.minY(), box.minZ())));
+        points.add(new BlockVec(playerLocation.add(box.maxX(), box.minY(), box.maxZ())));
 
-        Block block1 = ac.getBlockAt(p, corner1);
-        Block block2 = ac.getBlockAt(p, corner2);
-        Block block3 = ac.getBlockAt(p, corner3);
-        Block block4 = ac.getBlockAt(p, corner4);
-
-        // add the blocks to the list
-        materialList.add(block1);
-        materialList.add(block2);
-        materialList.add(block3);
-        materialList.add(block4);
-        return materialList;
-    }
-
-    public List<Block> getBlocksPlayerIsStandingOn(Player p) {
-        return getBlocksPlayerIsStandingOn(p, 0);
-    }
-
-    public List<Block> getBlocksPlayerIsStandingOnAndAbove(Player p, int upAmount, boolean ignoreFeet) {
-        List<Block> materialList = new ArrayList<>();
-        for (int i = ignoreFeet ? 1 : 0; i < upAmount; i++) {
-            materialList.addAll(getBlocksPlayerIsStandingOn(p, i));
+        Set<Integer> blockIds = new HashSet<>(points.size());
+        for (Point point : points) {
+            blockIds.add(ac.getBlockAt(p, point).id());
         }
-        return materialList;
+
+        return blockIds;
+    }
+
+    public Set<Integer> getBlocksPlayerIsStandingOn(Player p) {
+        return getBlockIdsAtPlayerFeet(p, -0.1);
+    }
+
+    public Set<Integer> getBlockIdsPlayerIsStandingOnAndAbove(Player p, int upAmount, boolean ignoreFeet) {
+        Set<Integer> idSet = new HashSet<>();
+        for (int i = ignoreFeet ? 1 : 0; i < upAmount; i++) {
+            idSet.addAll(getBlockIdsAtPlayerFeet(p, i-0.1));
+        }
+
+        return idSet;
     }
 
     public boolean isOnGround(Player p) {
-        return getBlocksPlayerIsStandingOn(p).stream().anyMatch(b -> !b.compare(Block.AIR));
+        return !getBlocksPlayerIsStandingOn(p).stream().allMatch(id -> id == Block.AIR.id());
     }
 
-    public boolean isNegateFallDamage(Player p) {
-        List<Block> standingOn = getBlocksPlayerIsStandingOnAndAbove(p, 2, false);
-        return isInBlock(Block.WATER, standingOn) ||
-                isInBlock(Block.LAVA, standingOn) ||
-                isInBlock(Block.SLIME_BLOCK, standingOn) ||
-                isInBlock(Block.HONEY_BLOCK, standingOn) ||
-                isInBlock(Block.COBWEB, standingOn) ||
-                isInBlock(Block.VINE, standingOn) ||
-                isInBlock(Block.LADDER, standingOn) ||
-                isInBlock(Block.WEEPING_VINES, standingOn) ||
-                isInBlock(Block.TWISTING_VINES, standingOn) ||
-                isInBlock(Block.WEEPING_VINES_PLANT, standingOn) ||
-                isInBlock(Block.TWISTING_VINES_PLANT, standingOn);
-    }
-
-    public boolean isInBlock(Player p, Block material) {
-        List<Block> materials = getBlocksPlayerIsStandingOn(p);
-        return materials.stream().anyMatch(b -> b == material);
-    }
-
-    public boolean isInBlock(Block material, List<Block> standingOn) {
-        return standingOn.stream().anyMatch(b -> b.compare(material));
+    public boolean shouldNegateFallDamage(Player p) {
+        Set<Integer> standingOn = getBlockIdsPlayerIsStandingOnAndAbove(p, 2, false);
+        return standingOn.stream().anyMatch(NO_FALL_DAMAGE_BLOCKS::contains);
     }
 
     public boolean isBypassSpeed(Player p) {
@@ -131,7 +130,7 @@ public abstract class ACCheck {
             return true;
         }
         //TODO: Riptide
-        if (p.isFlying()) {
+        if (p.isAllowFlying()) {
             return true;
         }
         if (p.isFlyingWithElytra()) {
@@ -154,46 +153,28 @@ public abstract class ACCheck {
         }
 
         if (isOnGround(p)) {
-            List<Block> standingOn = getBlocksPlayerIsStandingOn(p);
-            if ((isInBlock(Block.SOUL_SAND, standingOn) || isInBlock(Block.SOUL_SOIL, standingOn)) && ACUtils.isUsingSoulSpeed(p)) {
+            Set<Integer> standingOn = getBlocksPlayerIsStandingOn(p);
+            if (standingOn.contains(Block.SOUL_SAND.id()) || standingOn.contains(Block.SOUL_SOIL.id()) && ACUtils.isUsingSoulSpeed(p)) {
                 return true;
             }
-            if (isInBlock(Block.ICE, standingOn)) {
-                return true;
-            }
+
+            return standingOn.contains(Block.ICE.id());
         }
         return false;
     }
 
     public boolean isBypassFly(Player p) {
-        if (p.getGameMode() != GameMode.SURVIVAL && p.getGameMode() != GameMode.ADVENTURE) {
-            return true;
-        }
-        if (p.isFlying()) {
-            return true;
-        }
-        if (p.isFlyingWithElytra()) {
-            return true;
-        }
         // TODO: Check riptiding
-        if (p.getVehicle() != null) {
-            return true;
-        }
-        if (p.hasEffect(PotionEffect.JUMP_BOOST)) {
-            return true;
-        }
-        return false;
+        return (p.getGameMode() != GameMode.SURVIVAL && p.getGameMode() != GameMode.ADVENTURE) ||
+                p.isAllowFlying() ||
+                p.isFlyingWithElytra() ||
+                p.getVehicle() != null ||
+                p.hasEffect(PotionEffect.JUMP_BOOST);
     }
 
     public boolean isInBubbleColumn(Player p) {
-        List<Block> standingOn = getBlocksPlayerIsStandingOn(p);
-        return isInBlock(Block.BUBBLE_COLUMN, standingOn) ||
-                isInBlock(Block.BUBBLE_CORAL_BLOCK, standingOn) ||
-                isInBlock(Block.BUBBLE_CORAL_FAN, standingOn) ||
-                isInBlock(Block.BUBBLE_CORAL_WALL_FAN, standingOn) ||
-                isInBlock(Block.BUBBLE_CORAL, standingOn) ||
-                isInBlock(Block.BUBBLE_CORAL_FAN, standingOn) ||
-                isInBlock(Block.BUBBLE_CORAL_WALL_FAN, standingOn);
+        Set<Integer> standingOn = getBlocksPlayerIsStandingOn(p);
+        return standingOn.stream().anyMatch(BUBBLE_COLUMN_BLOCKS::contains);
     }
 
     public double getRunSpeed(Player p) {

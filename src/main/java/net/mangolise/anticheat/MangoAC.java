@@ -11,7 +11,6 @@ import net.mangolise.anticheat.checks.movement.TeleportSpamCheck;
 import net.mangolise.anticheat.checks.movement.UnaidedLevitationCheck;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerPacketOutEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -39,7 +38,7 @@ public class MangoAC {
         this.config = config;
     }
 
-    public Block getBlockAt(Player player, Pos pos) {
+    public Block getBlockAt(Player player, Point pos) {
         if (fakeBlocks.containsKey(player.getUuid())) for (Tuple<Point, Block> fakeBlock : fakeBlocks.get(player.getUuid())) {
             if (pos.sameBlock(fakeBlock.getFirst())) {
                 return fakeBlock.getSecond();

@@ -5,12 +5,12 @@ import net.mangolise.anticheat.Tuple;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.entity.EntityTeleportEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.tag.Tag;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * We can't get when the player teleports, so to flag for speed we need the following:
@@ -22,7 +22,7 @@ public class BasicSpeedCheck extends ACCheck {
     private final static int SAMPLE_TIME = 1500;
     private final static int AVERAGE_TIME_PERIOD_MS = 1000;
 
-    private final HashMap<UUID, List<Tuple<Long, Pos>>> playerDetails = new HashMap<>();
+    private final Tag<List<Tuple<Long, Pos>>> PLAYER_DETAILS_TAG = Tag.<List<Tuple<Long, Pos>>>Transient("anticheat_player_details").defaultValue(new ArrayList<>());
 
     public BasicSpeedCheck() {
         super("BasicSpeed");
@@ -31,6 +31,11 @@ public class BasicSpeedCheck extends ACCheck {
     @Override
     public void register() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
+        MinecraftServer.getGlobalEventHandler().addListener(EntityTeleportEvent.class, e -> {
+            if (e.getEntity() instanceof Player player) {
+                player.getTag(PLAYER_DETAILS_TAG).clear(); // Won't be accurate
+            }
+        });
     }
 
     @Override
@@ -38,7 +43,7 @@ public class BasicSpeedCheck extends ACCheck {
         super.disableFor(player, time);
 
         // reset details if the check is disabled
-        playerDetails.put(player.getUuid(), new ArrayList<>());
+        player.getTag(PLAYER_DETAILS_TAG).clear();
     }
 
     private void onMove(PlayerMoveEvent e) {
@@ -50,13 +55,7 @@ public class BasicSpeedCheck extends ACCheck {
             return;
         }
 
-        List<Tuple<Long, Pos>> details = playerDetails.get(p.getUuid());
-        if (details == null) {
-            details = new ArrayList<>();
-            playerDetails.put(p.getUuid(), details);
-            debug(p, "created new details");
-            return;
-        }
+        List<Tuple<Long, Pos>> details = p.getTag(PLAYER_DETAILS_TAG);
 
         // Check if there's any outliers
         double sum = 0;
@@ -70,7 +69,7 @@ public class BasicSpeedCheck extends ACCheck {
 
         if (details.stream().anyMatch(tuple -> Math.abs(tuple.getSecond().x() - mean) > standardDeviation * 2)) {
             debug(p, "outlier detected in speed, IGNORING ALL DATA");
-            playerDetails.put(p.getUuid(), new ArrayList<>());
+            p.getTag(PLAYER_DETAILS_TAG).clear();
             return;
         }
 
@@ -78,7 +77,7 @@ public class BasicSpeedCheck extends ACCheck {
 
         details.removeIf(tuple -> tuple.getFirst() < System.currentTimeMillis() - SAMPLE_TIME);
         details.add(new Tuple<>(System.currentTimeMillis(), to));
-        playerDetails.put(p.getUuid(), details);
+        p.setTag(PLAYER_DETAILS_TAG, details);
 
         Pos from = details.getFirst().getSecond();
         long timeSinceFrom = System.currentTimeMillis() - details.getFirst().getFirst();
