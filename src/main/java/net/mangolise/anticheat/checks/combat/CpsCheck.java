@@ -4,13 +4,14 @@ import net.mangolise.anticheat.ACCheck;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.EntityAttackEvent;
+import net.minestom.server.tag.Tag;
 
 import java.util.*;
 
 public class CpsCheck extends ACCheck {
     private static final double THRESHOLD = 20;
     private static final long SAMPLE_TIME = 1000;
-    private final Map<UUID, List<Long>> hits = new HashMap<>();
+    private static final Tag<List<Long>> HITS_TAG = Tag.<List<Long>>Transient("anticheat_cps_hits").defaultValue(ArrayList::new);
 
     public CpsCheck() {
         super("CPS");
@@ -27,9 +28,10 @@ public class CpsCheck extends ACCheck {
                 return;
             }
 
-            List<Long> pHits = hits.computeIfAbsent(player.getUuid(), uuid -> new ArrayList<>());
+            List<Long> pHits = player.getTag(HITS_TAG);
             pHits.add(System.currentTimeMillis());
             pHits.removeIf(time -> time < System.currentTimeMillis() - SAMPLE_TIME);
+            player.setTag(HITS_TAG, pHits);
 
             int cps = pHits.size();
             debug(player, "CPS: " + cps + " (SD: " + standardDeviation(pHits) + ")");

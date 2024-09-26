@@ -5,13 +5,11 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerMoveEvent;
-
-import java.util.*;
+import net.minestom.server.tag.Tag;
 
 public class UnaidedLevitationCheck extends ACCheck {
     private final static int THRESHOLD = 3;
-
-    private final HashMap<UUID, Double> blocksRaised = new HashMap<>();
+    private final Tag<Double> BLOCKS_RAISED_TAG = Tag.Double("anticheat_unaidedlev_raisedblocks").defaultValue(0D);
 
     public UnaidedLevitationCheck() {
         super("UnaidedLevitation");
@@ -25,14 +23,13 @@ public class UnaidedLevitationCheck extends ACCheck {
     private void onMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
         if (isBypassing(p)) return;
-        UUID playerId = p.getUuid();
 
         if (isBypassFly(p)) {
             return;
         }
 
         if (isOnGround(p)) {
-            blocksRaised.remove(playerId);
+            p.removeTag(BLOCKS_RAISED_TAG);
             return;
         }
 
@@ -43,8 +40,7 @@ public class UnaidedLevitationCheck extends ACCheck {
         }
 
         // add the distance between the two y values to the hashmap
-        double newRaised = blocksRaised.getOrDefault(playerId, 0.0) + (to.y() - from.y());
-        blocksRaised.put(playerId, newRaised);
+        double newRaised = p.updateAndGetTag(BLOCKS_RAISED_TAG, old -> old + (to.y() - from.y()));
 
         // check if the player has gone up more than 3 blocks without going down then fail
         if (newRaised > THRESHOLD) {

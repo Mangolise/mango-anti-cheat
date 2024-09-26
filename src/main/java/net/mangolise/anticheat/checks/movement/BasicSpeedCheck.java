@@ -18,11 +18,12 @@ import java.util.List;
  * - All movements are consistent, the speed shouldn't spike once (e.g. teleporting)
  */
 public class BasicSpeedCheck extends ACCheck {
-    private final static float THRESHOLD = 4f;  // Usually starts false flagging at 0.6
-    private final static int SAMPLE_TIME = 1500;
-    private final static int AVERAGE_TIME_PERIOD_MS = 1000;
+    private static final float THRESHOLD = 4f;  // Usually starts false flagging at 0.6
+    private static final int SAMPLE_TIME = 1500;
+    private static final int AVERAGE_TIME_PERIOD_MS = 1000;
+    private static final int MIN_SAMPLE_SIZE = 5;
 
-    private final Tag<List<Tuple<Long, Pos>>> PLAYER_DETAILS_TAG = Tag.<List<Tuple<Long, Pos>>>Transient("anticheat_player_details").defaultValue(new ArrayList<>());
+    private final Tag<List<Tuple<Long, Pos>>> PLAYER_DETAILS_TAG = Tag.<List<Tuple<Long, Pos>>>Transient("anticheat_basicspeed_player_details").defaultValue(ArrayList::new);
 
     public BasicSpeedCheck() {
         super("BasicSpeed");
@@ -86,6 +87,11 @@ public class BasicSpeedCheck extends ACCheck {
         if (timeSinceFrom < averagingPeriod) {
             debug(p, "averaging time not met");
             return;  // Average must be over the averaging period.
+        }
+
+        if (details.size() < MIN_SAMPLE_SIZE) {
+            debug(p, "min sample size not met");
+            return;
         }
 
         double horizontalDistance = Math.sqrt(Math.pow(to.x() - from.x(), 2) + Math.pow(to.z() - from.z(), 2));

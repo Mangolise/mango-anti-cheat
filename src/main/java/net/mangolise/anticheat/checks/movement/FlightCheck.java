@@ -7,12 +7,14 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.tag.Tag;
 
 import java.util.*;
 
 public class FlightCheck extends ACCheck {
     private static final long MIN_SAMPLE_TIME = 500;
-    private final HashMap<UUID, List<Tuple<Long, Pos>>> playerDetails = new HashMap<>();
+    private static final int MIN_SAMPLE_SIZE = 5;
+    private final Tag<List<Tuple<Long, Pos>>> PLAYER_DETAILS_TAG = Tag.<List<Tuple<Long, Pos>>>Transient("anticheat_flight_player_details").defaultValue(ArrayList::new);
 
     public FlightCheck() {
         super("Flight");
@@ -23,7 +25,7 @@ public class FlightCheck extends ACCheck {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
         MinecraftServer.getGlobalEventHandler().addListener(AddEntityToInstanceEvent.class, e -> {
             if (e.getEntity() instanceof Player p) {
-                playerDetails.remove(p.getUuid());
+                p.removeTag(PLAYER_DETAILS_TAG);
             }
         });
     }
@@ -40,8 +42,8 @@ public class FlightCheck extends ACCheck {
         Pos from = e.getPlayer().getPosition();
         Long fromTime = System.currentTimeMillis();
         Pos to = e.getNewPosition();
-        if (playerDetails.containsKey(p.getUuid())) {  // Only bother removing stuff if there is stuff to remove
-            List<Tuple<Long, Pos>> details = playerDetails.get(p.getUuid());
+        List<Tuple<Long, Pos>> details = p.getTag(PLAYER_DETAILS_TAG);
+        if (!details.isEmpty()) {  // Only bother removing stuff if there is stuff to remove
             details.removeIf(tuple -> tuple.getFirst() < System.currentTimeMillis() - 1000);
             details.add(new Tuple<>(System.currentTimeMillis(), to));
 
@@ -52,13 +54,12 @@ public class FlightCheck extends ACCheck {
             from = details.getFirst().getSecond();
             fromTime = details.getFirst().getFirst();
         } else {
-            List<Tuple<Long, Pos>> details = new ArrayList<>();
             details.add(new Tuple<>(System.currentTimeMillis(), to));
-            playerDetails.put(p.getUuid(), details);
+            p.setTag(PLAYER_DETAILS_TAG, details);
         }
 
         if (Objects.requireNonNull(to).y() != from.y()) {
-            playerDetails.remove(p.getUuid());
+            p.removeTag(PLAYER_DETAILS_TAG);
             debug(p, "changed y");
             return;
         }
@@ -70,7 +71,7 @@ public class FlightCheck extends ACCheck {
         }
 
         if (isOnGround(p)) {
-            playerDetails.remove(p.getUuid());
+            p.removeTag(PLAYER_DETAILS_TAG);
             debug(p, "on ground");
             return;
         }
@@ -78,6 +79,11 @@ public class FlightCheck extends ACCheck {
         // Return if the oldest location is newer than half a second
         if (fromTime > System.currentTimeMillis() - MIN_SAMPLE_TIME) {
             debug(p, "sample time not met");
+            return;
+        }
+
+        if (details.size() < MIN_SAMPLE_SIZE) {
+            debug(p, "sample size too low");
             return;
         }
 

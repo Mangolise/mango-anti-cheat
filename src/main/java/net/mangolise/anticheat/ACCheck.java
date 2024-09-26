@@ -66,7 +66,7 @@ public abstract class ACCheck {
     }
 
     protected void debug(Player player, String message) {
-        if (!config.debugChecks().contains(message)) {
+        if (!config.debugChecks().contains(name)) {
             return;
         }
         player.sendMessage("[" + name() + "] " + message);
