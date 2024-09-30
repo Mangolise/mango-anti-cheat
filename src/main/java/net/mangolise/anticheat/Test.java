@@ -27,6 +27,10 @@ public class Test {
     public static void main(String[] args) {
         System.out.println("Starting test server...");
 
+        // It's hard to test when minestom kicks cheaters
+        System.setProperty("minestom.packet-queue-size", "10000");
+        System.setProperty("minestom.packet-per-tick", "10000");
+
         MinecraftServer server = MinecraftServer.init();
 
         IChunkLoader chunkLoader = GameSdkUtils.getPolarLoaderFromResource("test-world.polar");

@@ -9,6 +9,7 @@ import net.mangolise.anticheat.checks.movement.FlightCheck;
 import net.mangolise.anticheat.checks.movement.TeleportCheck;
 import net.mangolise.anticheat.checks.movement.TeleportSpamCheck;
 import net.mangolise.anticheat.checks.movement.UnaidedLevitationCheck;
+import net.mangolise.anticheat.checks.other.FastBreakCheck;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -31,7 +32,8 @@ public class MangoAC {
         new ReachCheck(),
         new CpsCheck(),
         new HitConsistencyCheck(),
-        new TeleportSpamCheck()
+        new TeleportSpamCheck(),
+        new FastBreakCheck()
     );
 
     public MangoAC(Config config) {
@@ -53,10 +55,10 @@ public class MangoAC {
             acCheck.enable(this, config);
         });
 
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, e -> {
-            fakeBlocks.remove(e.getPlayer().getUuid());
-        });
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, e ->
+                fakeBlocks.remove(e.getPlayer().getUuid()));
 
+        // This is WIP, just disable flight and levi if you have fake blocks
         MinecraftServer.getGlobalEventHandler().addListener(PlayerPacketOutEvent.class, e -> {
             switch (e.getPacket()) {
                 case BlockChangePacket packet -> {
@@ -72,9 +74,8 @@ public class MangoAC {
     }
 
     public void tempDisableCheck(Player player, Class<? extends ACCheck> check, int time) {
-        checks.stream().filter(acCheck -> acCheck.getClass().equals(check)).findFirst().ifPresent(acCheck -> {
-            acCheck.disableFor(player, time);
-        });
+        checks.stream().filter(acCheck -> acCheck.getClass().equals(check)).findFirst().ifPresent(acCheck ->
+                acCheck.disableFor(player, time));
     }
 
     /**
