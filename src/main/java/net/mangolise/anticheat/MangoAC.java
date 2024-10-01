@@ -2,6 +2,7 @@ package net.mangolise.anticheat;
 
 import net.mangolise.anticheat.checks.combat.CpsCheck;
 import net.mangolise.anticheat.checks.combat.HitConsistencyCheck;
+import net.mangolise.anticheat.checks.combat.KillauraManualCheck;
 import net.mangolise.anticheat.checks.combat.ReachCheck;
 import net.mangolise.anticheat.checks.exploits.IntOverflowCrashCheck;
 import net.mangolise.anticheat.checks.movement.BasicSpeedCheck;
@@ -19,6 +20,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.BlockChangePacket;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class MangoAC {
     private final Config config;
@@ -33,7 +35,8 @@ public class MangoAC {
         new CpsCheck(),
         new HitConsistencyCheck(),
         new TeleportSpamCheck(),
-        new FastBreakCheck()
+        new FastBreakCheck(),
+        new KillauraManualCheck()
     );
 
     public MangoAC(Config config) {
@@ -76,6 +79,12 @@ public class MangoAC {
     public void tempDisableCheck(Player player, Class<? extends ACCheck> check, int time) {
         checks.stream().filter(acCheck -> acCheck.getClass().equals(check)).findFirst().ifPresent(acCheck ->
                 acCheck.disableFor(player, time));
+    }
+
+    public CompletableFuture<Float> performManualCheck(Class<? extends ManualCheck> check, Player target) {
+        ACCheck c = checks.stream().filter(acCheck ->
+                acCheck.getClass().equals(check)).findFirst().get();
+        return ((ManualCheck) c).check(target);
     }
 
     /**

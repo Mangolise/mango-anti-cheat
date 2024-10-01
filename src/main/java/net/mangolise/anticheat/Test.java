@@ -2,6 +2,7 @@ package net.mangolise.anticheat;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.mangolise.anticheat.checks.combat.KillauraManualCheck;
 import net.mangolise.anticheat.checks.movement.UnaidedLevitationCheck;
 import net.mangolise.anticheat.events.PlayerFlagEvent;
 import net.mangolise.gamesdk.util.GameSdkUtils;
@@ -14,8 +15,10 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.timer.TaskSchedule;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Test server with a world that we can use to test the AC.
@@ -53,6 +56,13 @@ public class Test {
 
             if (e.getMessage().equals("dislev")) {
                 ac.tempDisableCheck(e.getPlayer(), UnaidedLevitationCheck.class, 100);
+            }
+
+            if (e.getMessage().equals("killaura")) {
+                MinecraftServer.getSchedulerManager().submitTask(() -> {
+                    ac.performManualCheck(KillauraManualCheck.class, e.getPlayer());
+                    return TaskSchedule.millis(ThreadLocalRandom.current().nextInt(0, 8000));
+                });
             }
         });
 

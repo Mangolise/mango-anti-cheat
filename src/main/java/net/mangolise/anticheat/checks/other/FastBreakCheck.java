@@ -28,6 +28,10 @@ public class FastBreakCheck extends ACCheck {
                     long timeTaken = System.currentTimeMillis() - event.getPlayer().getTag(LAST_START_DIG_TAG);
                     if (timeTaken <= MIN_TIME) {
                         flag(event.getPlayer(), 1f);
+
+                        if (!config.passive()) {  // This doesn't achieve much, it may make the break slightly longer than instant
+                            event.setCancelled(true);
+                        }
                     }
                 }
             }

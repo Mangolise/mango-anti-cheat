@@ -59,20 +59,22 @@ public class BasicSpeedCheck extends ACCheck {
         List<Tuple<Long, Pos>> details = p.getTag(PLAYER_DETAILS_TAG);
 
         // Check if there's any outliers
-        double sum = 0;
-        double sumOfSquares = 0;
-        for (Tuple<Long, Pos> detail : details) {
-            sum += detail.getSecond().x();
-            sumOfSquares += Math.pow(detail.getSecond().x(), 2);
-        }
-        final double mean = sum / details.size();
-        final double standardDeviation = Math.sqrt((sumOfSquares - (Math.pow(sum, 2) / details.size())) / details.size());
+//        double sum = 0;
+//        double sumOfSquares = 0;
+//        for (Tuple<Long, Pos> detail : details) {
+//            sum += detail.getSecond().x();
+//            sumOfSquares += Math.pow(detail.getSecond().x(), 2);
+//        }
 
-        if (details.stream().anyMatch(tuple -> Math.abs(tuple.getSecond().x() - mean) > standardDeviation * 2)) {
-            debug(p, "outlier detected in speed, IGNORING ALL DATA");
-            p.getTag(PLAYER_DETAILS_TAG).clear();
-            return;
-        }
+        // Is this check needed? It was only here to combat tp
+//        final double mean = sum / details.size();
+//        final double standardDeviation = Math.sqrt((sumOfSquares - (Math.pow(sum, 2) / details.size())) / details.size());
+
+//        if (details.stream().anyMatch(tuple -> Math.abs(tuple.getSecond().x() - mean) > standardDeviation * 2)) {
+//            debug(p, "outlier detected in speed, IGNORING ALL DATA");
+//            p.getTag(PLAYER_DETAILS_TAG).clear();
+//            return;
+//        }
 
         Pos to = e.getNewPosition();
 
