@@ -5,11 +5,11 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.mangolise.anticheat.checks.combat.KillauraManualCheck;
 import net.mangolise.anticheat.checks.movement.UnaidedLevitationCheck;
 import net.mangolise.anticheat.events.PlayerFlagEvent;
+import net.mangolise.combat.CombatConfig;
+import net.mangolise.combat.MangoCombat;
 import net.mangolise.gamesdk.util.GameSdkUtils;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.LivingEntity;
-import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.event.entity.EntityAttackEvent;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -40,8 +40,14 @@ public class Test {
         Instance instance = MinecraftServer.getInstanceManager().createInstanceContainer(chunkLoader);
         instance.enableAutoChunkLoad(true);
 
+        MangoCombat.enableGlobal(CombatConfig.create().withAutomaticRespawn(true));
+
         MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, e -> e.setSpawningInstance(instance));
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, e -> e.getPlayer().teleport(GameSdkUtils.getSpawnPosition(instance)));
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, e -> {
+            final Pos spawnPoint = GameSdkUtils.getSpawnPosition(instance);
+            e.getPlayer().setRespawnPoint(spawnPoint);
+            e.getPlayer().teleport(spawnPoint);
+        });
 
         MangoAC ac = new MangoAC(new MangoAC.Config(false, List.of(), DEBUG_CHECKS));
 
@@ -66,13 +72,13 @@ public class Test {
             }
         });
 
-        MinecraftServer.getGlobalEventHandler().addListener(EntityAttackEvent.class, e -> {
-            if (!(e.getTarget() instanceof LivingEntity target)) {
-                return;
-            }
-
-            target.damage(Damage.fromEntity(e.getEntity(), 0f));
-        });
+//        MinecraftServer.getGlobalEventHandler().addListener(EntityAttackEvent.class, e -> {
+//            if (!(e.getTarget() instanceof LivingEntity target)) {
+//                return;
+//            }
+//
+//            target.damage(Damage.fromEntity(e.getEntity(), 0f));
+//        });
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerFlagEvent.class, e ->
                 e.player().sendMessage(Component

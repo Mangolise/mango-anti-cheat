@@ -4,8 +4,10 @@ import net.mangolise.anticheat.ACCheck;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.NotNull;
 
 public class UnaidedLevitationCheck extends ACCheck {
     private final static int THRESHOLD = 3;
@@ -18,6 +20,15 @@ public class UnaidedLevitationCheck extends ACCheck {
     @Override
     public void register() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
+        MinecraftServer.getGlobalEventHandler().addListener(EntityDamageEvent.class, this::onDamage);
+    }
+
+    private void onDamage(@NotNull EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        player.removeTag(BLOCKS_RAISED_TAG);
     }
 
     private void onMove(PlayerMoveEvent e) {
