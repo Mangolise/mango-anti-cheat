@@ -37,7 +37,7 @@ public class TeleportCheck extends ACCheck {
         if (Math.abs(zDiff) > (zDiff < 0 ? backwardThreshold : forwardThreshold)) {  // If they are going backward, we allow a bit more
             float certainty = Math.min(1f, ((float) zDiff / 10f) + 0.5f);
             flag(p, certainty);
-            if (!config.passive()) {
+            if (isNotPassive()) {
                 e.setCancelled(true);
             }
         }

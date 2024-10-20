@@ -89,7 +89,7 @@ public class FlightCheck extends ACCheck {
 
         float certainty = 0.7f;  // We are cancelling so it's binary, we can't have varying certainty.
         flag(p, certainty);  // They have moved without going up or down, and they are not on the ground.
-        if (!config.passive()) {
+        if (isNotPassive()) {
             e.setCancelled(true);
         }
     }

@@ -5,11 +5,7 @@ import net.mangolise.anticheat.checks.combat.HitConsistencyCheck;
 import net.mangolise.anticheat.checks.combat.KillauraManualCheck;
 import net.mangolise.anticheat.checks.combat.ReachCheck;
 import net.mangolise.anticheat.checks.exploits.IntOverflowCrashCheck;
-import net.mangolise.anticheat.checks.movement.BasicSpeedCheck;
-import net.mangolise.anticheat.checks.movement.FlightCheck;
-import net.mangolise.anticheat.checks.movement.TeleportCheck;
-import net.mangolise.anticheat.checks.movement.TeleportSpamCheck;
-import net.mangolise.anticheat.checks.movement.UnaidedLevitationCheck;
+import net.mangolise.anticheat.checks.movement.*;
 import net.mangolise.anticheat.checks.other.FastBreakCheck;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
@@ -36,7 +32,8 @@ public class MangoAC {
         new HitConsistencyCheck(),
         new TeleportSpamCheck(),
         new FastBreakCheck(),
-        new KillauraManualCheck()
+        new KillauraManualCheck(),
+        new PhaseCheck()
     );
 
     public MangoAC(Config config) {
@@ -88,7 +85,55 @@ public class MangoAC {
     }
 
     /**
-     * @param passive Whether the AC should disable lag backs and just observe players.
+     * @param passive
      */
-    public record Config(boolean passive, List<Class<? extends ACCheck>> disabledChecks, List<String> debugChecks) { }
+    public record Config(boolean passive, List<Class<? extends ACCheck>> disabledChecks, List<String> debugChecks, List<Class<? extends ACCheck>> innocentChecks) {
+        public Config() {
+            this(false, List.of(), List.of(), List.of(PhaseCheck.class));
+        }
+
+        /**
+         * Create a new config with default values.
+         * @return The new config.
+         */
+        public static Config create() {
+            return new Config();
+        }
+
+        /**
+         * Whether the AC should disable lag backs and just observe players.
+         * @param passive The value.
+         * @return The new config.
+         */
+        public Config withPassive(boolean passive) {
+            return new Config(passive, disabledChecks, debugChecks, innocentChecks);
+        }
+
+        /**
+         * A list of checks which won't create flags but will create lag backs regardless of `passive`.
+         * @param innocentChecks The value.
+         * @return The new config.
+         */
+        public Config withInnocentChecks(List<Class<? extends ACCheck>> innocentChecks) {
+            return new Config(passive, disabledChecks, debugChecks, innocentChecks);
+        }
+
+        /**
+         * A list of checks which will not run or flag.
+         * @param disabledChecks The value.
+         * @return The new config.
+         */
+        public Config withDisabledChecks(List<Class<? extends ACCheck>> disabledChecks) {
+            return new Config(passive, disabledChecks, debugChecks, innocentChecks);
+        }
+
+        /**
+         * A list of checks which will print debug info to players, this should not be used in production.
+         * @param debugChecks The value.
+         * @return The new config.
+         */
+        public Config withDebugChecks(List<String> debugChecks) {
+            return new Config(passive, disabledChecks, debugChecks, innocentChecks);
+        }
+    }
 }

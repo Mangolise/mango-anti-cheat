@@ -29,7 +29,7 @@ public class FastBreakCheck extends ACCheck {
                     if (timeTaken <= MIN_TIME) {
                         flag(event.getPlayer(), 1f);
 
-                        if (!config.passive()) {  // This doesn't achieve much, it may make the break slightly longer than instant
+                        if (isNotPassive()) {  // This doesn't achieve much, it may make the break slightly longer than instant
                             event.setCancelled(true);
                         }
                     }

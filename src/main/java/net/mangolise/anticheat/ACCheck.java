@@ -78,7 +78,14 @@ public abstract class ACCheck {
                 disabledPlayers.contains(player.getUuid());
     }
 
+    public boolean isNotPassive() {
+        return !config.passive() || config.innocentChecks().contains(this.getClass());
+    }
+
     public void flag(Player player, float certainty) {
+        if (config.innocentChecks().contains(this.getClass())) {
+            return;
+        }
         PlayerFlagEvent event = new PlayerFlagEvent(name(), player, certainty);
         MinecraftServer.getGlobalEventHandler().call(event);
     }
@@ -170,6 +177,18 @@ public abstract class ACCheck {
                 p.isFlyingWithElytra() ||
                 p.getVehicle() != null ||
                 p.hasEffect(PotionEffect.JUMP_BOOST);
+    }
+
+    public boolean isFullBlock(Block block) {
+        if (!block.isSolid()) {
+            return false;
+        }
+        if (block.namespace().value().contains("stair")) {
+            return false;
+        }
+        Point start = block.registry().collisionShape().relativeStart();
+        Point end = block.registry().collisionShape().relativeEnd();
+        return Math.abs(end.x() - start.x()) == 1 && Math.abs(end.y() - start.y()) == 1 && Math.abs(end.z() - start.z()) == 1;
     }
 
     public boolean isInBubbleColumn(Player p) {

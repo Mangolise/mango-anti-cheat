@@ -57,7 +57,7 @@ public class UnaidedLevitationCheck extends ACCheck {
         if (newRaised > THRESHOLD) {
             float certainty = Math.min(1f, (float) ((newRaised - THRESHOLD) / 10d) + 0.5f);
             flag(p, certainty);
-            if (!config.passive()) {
+            if (isNotPassive()) {
                 e.setCancelled(true);
             }
         }

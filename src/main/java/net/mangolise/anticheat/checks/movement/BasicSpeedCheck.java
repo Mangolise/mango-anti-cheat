@@ -107,7 +107,7 @@ public class BasicSpeedCheck extends ACCheck {
             float certainty = (float) Math.min(1f, (speed - expectedMaxWalkSpeed) / 2f);
             flag(p, certainty);
             debug(p, "Lowest valid threshold: " + (speed - expectedMaxWalkSpeed));
-            if (!config.passive()) {
+            if (isNotPassive()) {
                 e.setCancelled(true);
             }
         }

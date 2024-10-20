@@ -25,7 +25,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Test {
     // Checks that debug messages should be sent for
-    private static final List<String> DEBUG_CHECKS = List.of();
+    private static final List<String> DEBUG_CHECKS = List.of("Phase");
 
     public static void main(String[] args) {
         System.out.println("Starting test server...");
@@ -49,7 +49,9 @@ public class Test {
             e.getPlayer().teleport(spawnPoint);
         });
 
-        MangoAC ac = new MangoAC(new MangoAC.Config(false, List.of(), DEBUG_CHECKS));
+        MangoAC ac = new MangoAC(MangoAC.Config.create()
+                .withDebugChecks(DEBUG_CHECKS)
+                .withInnocentChecks(List.of()));
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, e -> {
             if (e.getMessage().equals("t")) {

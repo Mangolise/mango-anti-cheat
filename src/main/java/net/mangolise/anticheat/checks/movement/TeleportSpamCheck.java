@@ -47,7 +47,7 @@ public class TeleportSpamCheck extends ACCheck {
             if (times.size() > MAX_TELEPORTS) {
                 float certainty = Math.min(1f, ((float) (times.size() - MAX_TELEPORTS) / 10f) + 0.5f);
                 flag(e.getPlayer(), certainty);
-                if (!config.passive()) e.setCancelled(true);
+                if (isNotPassive()) e.setCancelled(true);
             }
         });
     }
