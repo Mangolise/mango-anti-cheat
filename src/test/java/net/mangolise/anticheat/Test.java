@@ -7,6 +7,7 @@ import net.mangolise.anticheat.checks.movement.UnaidedLevitationCheck;
 import net.mangolise.anticheat.events.PlayerFlagEvent;
 import net.mangolise.combat.CombatConfig;
 import net.mangolise.combat.MangoCombat;
+import net.mangolise.gamesdk.features.AdminCommandsFeature;
 import net.mangolise.gamesdk.util.GameSdkUtils;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -15,6 +16,7 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.permission.Permission;
 import net.minestom.server.timer.TaskSchedule;
 
 import java.util.List;
@@ -42,16 +44,18 @@ public class Test {
 
         MangoCombat.enableGlobal(CombatConfig.create().withAutomaticRespawn(true));
 
-        MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, e -> e.setSpawningInstance(instance));
+        MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, e -> {
+            e.getPlayer().addPermission(new Permission("*"));
+            e.setSpawningInstance(instance);
+        });
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, e -> {
-            final Pos spawnPoint = GameSdkUtils.getSpawnPosition(instance);
+            final Pos spawnPoint = GameSdkUtils.getSpawnPosition(instance).sub(0, 1, 0);
             e.getPlayer().setRespawnPoint(spawnPoint);
             e.getPlayer().teleport(spawnPoint);
         });
 
         MangoAC ac = new MangoAC(MangoAC.Config.create()
-                .withDebugChecks(DEBUG_CHECKS)
-                .withInnocentChecks(List.of()));
+                .withDebugChecks(DEBUG_CHECKS));
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, e -> {
             if (e.getMessage().equals("t")) {
@@ -88,6 +92,7 @@ public class Test {
                     .color(NamedTextColor.RED)));
 
         ac.start();
+        new AdminCommandsFeature().setup(null);
 
         server.start("0.0.0.0", GameSdkUtils.getConfiguredPort());
     }

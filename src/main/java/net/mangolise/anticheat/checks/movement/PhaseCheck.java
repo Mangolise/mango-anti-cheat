@@ -3,6 +3,8 @@ package net.mangolise.anticheat.checks.movement;
 import net.mangolise.anticheat.ACCheck;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +27,10 @@ public class PhaseCheck extends ACCheck {
     }
 
     private void onMove(@NotNull PlayerMoveEvent event) {
+        if (event.getPlayer().getGameMode() == GameMode.SPECTATOR) {
+            return;
+        }
+
         final Pos to = event.getNewPosition();
         if (to.y() > event.getPlayer().getPosition().y()) {
             return;
@@ -35,12 +41,12 @@ public class PhaseCheck extends ACCheck {
             flag(event.getPlayer(), 0.7f);
             if (isNotPassive()) {
                 // Try and get them out, push in the direction they came from until they hit air
-//                Vec dir = to.sub(event.getPlayer().getPosition()).asVec().normalize();
-//                Pos attempt = to;
-//                while (!attempt.sameBlock(to)) {
-//                    attempt = attempt.sub(dir.mul(0.5));
-//                }
-//                event.getPlayer().teleport(attempt);
+                Vec dir = to.sub(event.getPlayer().getPosition()).asVec().normalize();
+                Pos attempt = to;
+                while (attempt.sameBlock(to)) {
+                    attempt = attempt.sub(dir.mul(0.5));
+                }
+                event.getPlayer().teleport(attempt);
                 event.setCancelled(true);
             }
         }
